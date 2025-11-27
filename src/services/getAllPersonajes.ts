@@ -19,6 +19,7 @@ export const getAllCharacters = async (): Promise<CharacterDetails[]> => {
 // Función para transformar los datos completos a solo lo necesario para las cards
 const transformToCardData = (characters: CharacterDetails[]): CharacterCard[] => {
   return characters.map((character) => ({
+    id: character.id,
     name: character.name,
     image: character.image,
     status: character.status,

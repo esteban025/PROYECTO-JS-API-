@@ -1,0 +1,48 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { getCharacterById, getAllCharactersIds } from "@/services/getCharacter";
+
+export async function getStaticPaths() {
+  const ids = await getAllCharactersIds();
+
+  return ids.map((id) => ({
+    params: { id: id.toString() },
+  }));
+}
+
+const { id } = Astro.params;
+const character = await getCharacterById(id!);
+
+if (!character) {
+  return Astro.redirect("/");
+}
+---
+
+<Layout title={`${character.name} - Personaje | Proyecto JS API Rick y Morty`}>
+  <header
+    class="w-full p-2 py-3 max-w-7xl mx-auto flex items-center flex-col gap-1"
+  >
+    <h3
+      class="font-semibold text-primary leading-tight text-center"
+      transition:name={`personage-name-${character.id}`}
+    >
+      {character.name}
+    </h3>
+  </header>
+  <main>
+    <figure>
+      <img
+        src={character.image}
+        alt={character.name}
+        class="w-full max-w-sm mx-auto h-auto object-cover rounded-md mb-4"
+        loading="lazy"
+        transition:name={`personage-image-${character.id}`}
+      />
+    </figure>
+  </main>
+</Layout>
+<style>
+  h3 {
+    font-size: clamp(2rem, 5vw, 4rem);
+  }
+</style>

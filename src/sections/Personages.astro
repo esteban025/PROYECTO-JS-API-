@@ -20,131 +20,177 @@ const personages = await getAllCharactersCards();
 
 <script>
   import { $ } from "@/utils/getElementDOM";
-  const $searchInput = $("#search-input") as HTMLInputElement;
-  const $charactersGrid = $("#characters-grid") as HTMLElement;
-  const noResults = $("#no-results") as HTMLElement;
-  const searchForm = $("#search-form") as HTMLFormElement;
-  const $statusButtons = document.querySelectorAll('[data-filter="status"]');
-  const $speciesSelect = $("#species-filter") as HTMLSelectElement;
-  const $clearButton = $("#clear-filters") as HTMLButtonElement;
 
-  // Estado de los filtros
-  let currentFilters = {
-    search: "",
-    status: "all",
-    species: "all",
-  };
+  document.addEventListener("astro:page-load", () => {
+    const $searchInput = $("#search-input") as HTMLInputElement;
+    const $charactersGrid = $("#characters-grid") as HTMLElement;
+    const noResults = $("#no-results") as HTMLElement;
+    const searchForm = $("#search-form") as HTMLFormElement;
+    const $statusButtons = document.querySelectorAll('[data-filter="status"]');
+    const $speciesSelect = $("#species-filter") as HTMLSelectElement;
+    const $clearButton = $("#clear-filters") as HTMLButtonElement;
 
-  // Prevenir el envío del formulario
-  searchForm?.addEventListener("submit", (e) => {
-    e.preventDefault();
-  });
+    // Clave para localStorage
+    const FILTERS_STORAGE_KEY = "rickmorty-filters";
 
-  // Función principal para filtrar personajes
-  const applyFilters = () => {
-    const cards = $charactersGrid?.querySelectorAll("article");
-    let visibleCount = 0;
-
-    cards?.forEach((card) => {
-      const nameElement = card.querySelector("h3");
-      const statusElement = card.querySelector("p.text-text-secondary");
-      const speciesElement = card.querySelector("figure p");
-
-      const characterName =
-        nameElement?.textContent?.toLowerCase().trim() || "";
-      const characterStatus =
-        statusElement?.textContent
-          ?.toLowerCase()
-          .replace("estado: ", "")
-          .trim() || "";
-      const characterSpecies =
-        speciesElement?.textContent?.toLowerCase().trim() || "";
-
-      // Verificar cada filtro
-      const matchesSearch =
-        currentFilters.search === "" ||
-        characterName.includes(currentFilters.search.toLowerCase());
-      const matchesStatus =
-        currentFilters.status === "all" ||
-        characterStatus === currentFilters.status;
-      const matchesSpecies =
-        currentFilters.species === "all" ||
-        characterSpecies === currentFilters.species;
-
-      // Mostrar solo si cumple todos los filtros
-      if (matchesSearch && matchesStatus && matchesSpecies) {
-        card.classList.remove("hidden");
-        visibleCount++;
-      } else {
-        card.classList.add("hidden");
+    // Cargar filtros desde localStorage o usar valores por defecto
+    const loadFiltersFromStorage = () => {
+      const stored = localStorage.getItem(FILTERS_STORAGE_KEY);
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          return { search: "", status: "all", species: "all" };
+        }
       }
-    });
-
-    // Mostrar mensaje si no hay resultados
-    if (visibleCount === 0) {
-      noResults?.classList.remove("hidden");
-      $charactersGrid?.classList.add("hidden");
-    } else {
-      noResults?.classList.add("hidden");
-      $charactersGrid?.classList.remove("hidden");
-    }
-  };
-
-  // Filtro por búsqueda
-  $searchInput?.addEventListener("input", (e) => {
-    const target = e.target as HTMLInputElement;
-    currentFilters.search = target.value;
-    applyFilters();
-  });
-
-  // Filtro por estado
-  $statusButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      // Remover clase active de todos los botones
-      $statusButtons.forEach((btn) => btn.classList.remove("active"));
-      // Agregar clase active al botón clickeado
-      button.classList.add("active");
-
-      currentFilters.status = button.getAttribute("data-value") || "all";
-      applyFilters();
-    });
-  });
-
-  // Filtro por especie
-  $speciesSelect?.addEventListener("change", (e) => {
-    const target = e.target as HTMLSelectElement;
-    currentFilters.species = target.value;
-    applyFilters();
-  });
-
-  // Limpiar todos los filtros
-  $clearButton?.addEventListener("click", () => {
-    // Resetear búsqueda
-    if ($searchInput) $searchInput.value = "";
-
-    // Resetear estado
-    $statusButtons.forEach((btn) => btn.classList.remove("active"));
-    const allButton = document.querySelector(
-      '[data-filter="status"][data-value="all"]',
-    );
-    allButton?.classList.add("active");
-
-    // Resetear especie
-    if ($speciesSelect) $speciesSelect.value = "all";
-
-    // Resetear filtros
-    currentFilters = {
-      search: "",
-      status: "all",
-      species: "all",
+      return { search: "", status: "all", species: "all" };
     };
 
-    applyFilters();
-  });
+    // Guardar filtros en localStorage
+    const saveFiltersToStorage = (filters: typeof currentFilters) => {
+      localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
+    };
 
-  // Inicializar con el botón "Todos" activo
-  const allButton = document.querySelector(
-    '[data-filter="status"][data-value="all"]',
-  );
-  allButton?.classList.add("active");
+    // Estado de los filtros - cargar desde localStorage
+    let currentFilters = loadFiltersFromStorage();
+
+    // Aplicar filtros guardados al cargar la página
+    const applyStoredFilters = () => {
+      // Aplicar búsqueda
+      if ($searchInput && currentFilters.search) {
+        $searchInput.value = currentFilters.search;
+      }
+
+      // Aplicar estado
+      $statusButtons.forEach((btn) => {
+        const value = btn.getAttribute("data-value");
+        if (value === currentFilters.status) {
+          btn.classList.add("active");
+        } else {
+          btn.classList.remove("active");
+        }
+      });
+
+      // Aplicar especie
+      if ($speciesSelect && currentFilters.species) {
+        $speciesSelect.value = currentFilters.species;
+      }
+
+      // Aplicar los filtros
+      applyFilters();
+    };
+
+    // Prevenir el envío del formulario
+    searchForm?.addEventListener("submit", (e) => {
+      e.preventDefault();
+    });
+
+    // Función principal para filtrar personajes
+    const applyFilters = () => {
+      const cards = $charactersGrid?.querySelectorAll("article");
+      let visibleCount = 0;
+
+      cards?.forEach((card) => {
+        const nameElement = card.querySelector("h3");
+        const statusElement = card.querySelector("p.text-text-secondary");
+        const speciesElement = card.querySelector("figure p");
+
+        const characterName =
+          nameElement?.textContent?.toLowerCase().trim() || "";
+        const characterStatus =
+          statusElement?.textContent
+            ?.toLowerCase()
+            .replace("estado: ", "")
+            .trim() || "";
+        const characterSpecies =
+          speciesElement?.textContent?.toLowerCase().trim() || "";
+
+        // Verificar cada filtro
+        const matchesSearch =
+          currentFilters.search === "" ||
+          characterName.includes(currentFilters.search.toLowerCase());
+        const matchesStatus =
+          currentFilters.status === "all" ||
+          characterStatus === currentFilters.status;
+        const matchesSpecies =
+          currentFilters.species === "all" ||
+          characterSpecies === currentFilters.species;
+
+        // Mostrar solo si cumple todos los filtros
+        if (matchesSearch && matchesStatus && matchesSpecies) {
+          card.classList.remove("hidden");
+          visibleCount++;
+        } else {
+          card.classList.add("hidden");
+        }
+      });
+
+      // Mostrar mensaje si no hay resultados
+      if (visibleCount === 0) {
+        noResults?.classList.remove("hidden");
+        $charactersGrid?.classList.add("hidden");
+      } else {
+        noResults?.classList.add("hidden");
+        $charactersGrid?.classList.remove("hidden");
+      }
+
+      // Guardar filtros en localStorage
+      saveFiltersToStorage(currentFilters);
+    };
+
+    // Filtro por búsqueda
+    $searchInput?.addEventListener("input", (e) => {
+      const target = e.target as HTMLInputElement;
+      currentFilters.search = target.value;
+      applyFilters();
+    });
+
+    // Filtro por estado
+    $statusButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        // Remover clase active de todos los botones
+        $statusButtons.forEach((btn) => btn.classList.remove("active"));
+        // Agregar clase active al botón clickeado
+        button.classList.add("active");
+
+        currentFilters.status = button.getAttribute("data-value") || "all";
+        applyFilters();
+      });
+    });
+
+    // Filtro por especie
+    $speciesSelect?.addEventListener("change", (e) => {
+      const target = e.target as HTMLSelectElement;
+      currentFilters.species = target.value;
+      applyFilters();
+    });
+
+    // Limpiar todos los filtros
+    $clearButton?.addEventListener("click", () => {
+      // Resetear búsqueda
+      if ($searchInput) $searchInput.value = "";
+
+      // Resetear estado
+      $statusButtons.forEach((btn) => btn.classList.remove("active"));
+      const allButton = document.querySelector(
+        '[data-filter="status"][data-value="all"]',
+      );
+      allButton?.classList.add("active");
+
+      // Resetear especie
+      if ($speciesSelect) $speciesSelect.value = "all";
+
+      // Resetear filtros
+      currentFilters = {
+        search: "",
+        status: "all",
+        species: "all",
+      };
+
+      applyFilters();
+    });
+
+    // Inicializar: aplicar filtros guardados al cargar la página
+    applyStoredFilters();
+  });
 </script>

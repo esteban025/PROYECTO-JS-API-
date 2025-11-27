@@ -21,36 +21,10 @@ const speciesOptions = await species();
           >Estado</span
         >
         <div class="flex items-center flex-wrap gap-2">
-          <ButtonFilter
-            text="Todos"
-            value="all"
-            filter="status"
-            classList="border-primary/20 hover:border-primary"
-          />
-          <ButtonFilter
-            text="Vivo"
-            value="alive"
-            filter="status"
-            classList="border-status-alive/20 hover:border-status-alive"
-            indicator={true}
-            indicatorColor="bg-status-alive"
-          />
-          <ButtonFilter
-            text="Muerto"
-            value="dead"
-            filter="status"
-            classList="border-status-dead/20 hover:border-status-dead"
-            indicator={true}
-            indicatorColor="bg-status-dead"
-          />
-          <ButtonFilter
-            text="Desconocido"
-            value="unknown"
-            filter="status"
-            classList="border-status-unknown/20 hover:border-status-unknown"
-            indicator={true}
-            indicatorColor="bg-status-unknown"
-          />
+          <ButtonFilter text="Todos" value="all" filter="status" />
+          <ButtonFilter text="Vivo" value="alive" filter="status" />
+          <ButtonFilter text="Muerto" value="dead" filter="status" />
+          <ButtonFilter text="Desconocido" value="unknown" filter="status" />
         </div>
       </div>
 

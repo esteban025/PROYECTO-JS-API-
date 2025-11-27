@@ -14,4 +14,4 @@ export interface CharacterDetails {
   created: string
 }
 
-export interface CharacterCard extends Pick<CharacterDetails, 'name' | 'image' | 'status' | 'species'> {}
+export interface CharacterCard extends Pick<CharacterDetails, 'id' | 'name' | 'image' | 'status' | 'species'> {}
