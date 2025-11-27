@@ -1,0 +1,43 @@
+---
+interface Props {
+  text: string;
+  value: string;
+  filter: string;
+  classList?: string;
+  indicator?: boolean;
+  indicatorColor?: string;
+}
+
+const {
+  text,
+  value,
+  filter,
+  classList = "",
+  indicator = false,
+  indicatorColor,
+} = Astro.props;
+---
+
+<button
+  class={`filter-btn px-2 py-1 rounded-lg bg-bg-card border-2 text-text-secondary hover:text-white hover:bg-bg-card/80 transition-all duration-200 text-xs font-medium ${classList} cursor-pointer block`}
+  data-filter={filter}
+  data-value={value}
+>
+  {
+    indicator && indicatorColor && (
+      <span
+        class={`inline-block w-2 h-2 rounded-full mr-2 ${indicatorColor}`}
+      />
+    )
+  }
+  {text}
+</button>
+
+<style>
+  .filter-btn.active {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary);
+    color: var(--color-text-dark);
+    font-weight: 600;
+  }
+</style>

@@ -1,0 +1,150 @@
+---
+import Card from "@/components/Card.astro";
+import { getAllCharactersCards } from "@/services/getAllPersonajes";
+const personages = await getAllCharactersCards();
+---
+
+<section class="w-full max-w-5xl mx-auto p-4">
+  <h2 class="text-3xl font-bold mb-6 text-white">Personajes</h2>
+  <div id="no-results" class="hidden text-center text-text-secondary py-8">
+    <p class="text-lg">No se encontraron personajes con ese nombre 😕</p>
+  </div>
+  <section
+    id="characters-grid"
+    class="grid gap-4"
+    style="grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));"
+  >
+    {personages.map((character) => <Card personage={character} />)}
+  </section>
+</section>
+
+<script>
+  import { $ } from "@/utils/getElementDOM";
+  const $searchInput = $("#search-input") as HTMLInputElement;
+  const $charactersGrid = $("#characters-grid") as HTMLElement;
+  const noResults = $("#no-results") as HTMLElement;
+  const searchForm = $("#search-form") as HTMLFormElement;
+  const $statusButtons = document.querySelectorAll('[data-filter="status"]');
+  const $speciesSelect = $("#species-filter") as HTMLSelectElement;
+  const $clearButton = $("#clear-filters") as HTMLButtonElement;
+
+  // Estado de los filtros
+  let currentFilters = {
+    search: "",
+    status: "all",
+    species: "all",
+  };
+
+  // Prevenir el envío del formulario
+  searchForm?.addEventListener("submit", (e) => {
+    e.preventDefault();
+  });
+
+  // Función principal para filtrar personajes
+  const applyFilters = () => {
+    const cards = $charactersGrid?.querySelectorAll("article");
+    let visibleCount = 0;
+
+    cards?.forEach((card) => {
+      const nameElement = card.querySelector("h3");
+      const statusElement = card.querySelector("p.text-text-secondary");
+      const speciesElement = card.querySelector("figure p");
+
+      const characterName =
+        nameElement?.textContent?.toLowerCase().trim() || "";
+      const characterStatus =
+        statusElement?.textContent
+          ?.toLowerCase()
+          .replace("estado: ", "")
+          .trim() || "";
+      const characterSpecies =
+        speciesElement?.textContent?.toLowerCase().trim() || "";
+
+      // Verificar cada filtro
+      const matchesSearch =
+        currentFilters.search === "" ||
+        characterName.includes(currentFilters.search.toLowerCase());
+      const matchesStatus =
+        currentFilters.status === "all" ||
+        characterStatus === currentFilters.status;
+      const matchesSpecies =
+        currentFilters.species === "all" ||
+        characterSpecies === currentFilters.species;
+
+      // Mostrar solo si cumple todos los filtros
+      if (matchesSearch && matchesStatus && matchesSpecies) {
+        card.classList.remove("hidden");
+        visibleCount++;
+      } else {
+        card.classList.add("hidden");
+      }
+    });
+
+    // Mostrar mensaje si no hay resultados
+    if (visibleCount === 0) {
+      noResults?.classList.remove("hidden");
+      $charactersGrid?.classList.add("hidden");
+    } else {
+      noResults?.classList.add("hidden");
+      $charactersGrid?.classList.remove("hidden");
+    }
+  };
+
+  // Filtro por búsqueda
+  $searchInput?.addEventListener("input", (e) => {
+    const target = e.target as HTMLInputElement;
+    currentFilters.search = target.value;
+    applyFilters();
+  });
+
+  // Filtro por estado
+  $statusButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      // Remover clase active de todos los botones
+      $statusButtons.forEach((btn) => btn.classList.remove("active"));
+      // Agregar clase active al botón clickeado
+      button.classList.add("active");
+
+      currentFilters.status = button.getAttribute("data-value") || "all";
+      applyFilters();
+    });
+  });
+
+  // Filtro por especie
+  $speciesSelect?.addEventListener("change", (e) => {
+    const target = e.target as HTMLSelectElement;
+    currentFilters.species = target.value;
+    applyFilters();
+  });
+
+  // Limpiar todos los filtros
+  $clearButton?.addEventListener("click", () => {
+    // Resetear búsqueda
+    if ($searchInput) $searchInput.value = "";
+
+    // Resetear estado
+    $statusButtons.forEach((btn) => btn.classList.remove("active"));
+    const allButton = document.querySelector(
+      '[data-filter="status"][data-value="all"]',
+    );
+    allButton?.classList.add("active");
+
+    // Resetear especie
+    if ($speciesSelect) $speciesSelect.value = "all";
+
+    // Resetear filtros
+    currentFilters = {
+      search: "",
+      status: "all",
+      species: "all",
+    };
+
+    applyFilters();
+  });
+
+  // Inicializar con el botón "Todos" activo
+  const allButton = document.querySelector(
+    '[data-filter="status"][data-value="all"]',
+  );
+  allButton?.classList.add("active");
+</script>
