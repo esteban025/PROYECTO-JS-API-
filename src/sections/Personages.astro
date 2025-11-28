@@ -12,6 +12,7 @@ const personages = await getAllCharactersCards();
   <section
     id="characters-grid"
     class="grid gap-4"
+    data-page-number={1}
     style="grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));"
   >
     {personages.map((character) => <Card personage={character} />)}

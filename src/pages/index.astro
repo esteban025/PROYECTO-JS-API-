@@ -3,7 +3,12 @@ import Layout from "@/layouts/Layout.astro";
 import HeaderPage from "@/sections/HeaderPage.astro";
 import SearchPersonage from "@/components/SearchPersonage.astro";
 import FiltersPersonage from "@/components/FiltersPersonage.astro";
-import PersonagesWithPagination from "@/components/react/PersonagesWithPagination";
+import Personages from "@/sections/Personages.astro";
+import Pagination from "@/components/Pagination.astro";
+import { getNumberPagination } from "@/services/getNumberPagination";
+// import PersonagesWithPagination from "@/components/react/PersonagesWithPagination";
+
+const numberPagination = await getNumberPagination();
 ---
 
 <Layout
@@ -13,5 +18,6 @@ import PersonagesWithPagination from "@/components/react/PersonagesWithPaginatio
 	<HeaderPage />
 	<SearchPersonage />
 	<FiltersPersonage />
-	<PersonagesWithPagination client:load />
+	<Personages />
+	<Pagination totalPages={numberPagination} />
 </Layout>

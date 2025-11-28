@@ -74,17 +74,11 @@ export default function Pagination({
   // Crear array con todos los números de página
   const allPages = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-  // Cálculo del offset para centrar perfectamente el número actual
-  // Viewport: 170px de ancho, centro en 85px
-  // Cada elemento: 50px de ancho + 10px de gap = 60px total
-  // El centro del viewport debe coincidir con el centro del elemento actual
   const itemWidth = 60; // ancho del elemento + gap
   const elementWidth = 50; // ancho solo del elemento
   const viewportCenter = 85; // centro del viewport (170 / 2)
   const elementCenter = elementWidth / 2; // centro del elemento (25px)
   
-  // Posición del centro del elemento actual: (currentPage - 1) * itemWidth + elementCenter
-  // Offset necesario: viewportCenter - posición del centro del elemento actual
   const offset = viewportCenter - ((currentPage - 1) * itemWidth + elementCenter);
 
   return (
