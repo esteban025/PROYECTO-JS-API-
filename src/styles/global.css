@@ -8,7 +8,10 @@
   --color-primary: #97ce4c;
   --color-secondary: #00b5cc;
   --color-bg-primary: #00010a;
-  --color-bg-card: #1a1d29;
+  --color-gradient-inter-card: linear-gradient(135deg, #39ff1426 0%, #00ffff14 50%, transparent 100%);
+  --color-gradient-name-card:  linear-gradient(90deg, #39FF14, #00ffff);
+  --color-bg-card: #121212a6;
+  --color-border-card: #39ff1433;
   --color-text-primary: #e8f5e9;
   --color-text-dark: #282828;
   --color-text-secondary: #b0bec5;
@@ -23,6 +26,9 @@
   --shadow-md-primary: 0 0 20px #97ce4c30;
   --shadow-portal: 0 0 20px rgb(151 206 76 / 0.3);
   --shadow-inset-select: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-card:0 8px 32px #00000099,0 0 30px #39ff1426;
+  /* --shadow-card-hover:0 20px 40px #000000cc, 0 0 50px #39ff1466, inset 0 0 30px #39ff141a; */
+  --shadow-card-hover:0 5px 10px #000000cc, 0 0 15px #39ff1466, inset 0 0 5px #39ff141a;
 
 
   --font-inter: 'Inter Tight Variable', sans-serif;

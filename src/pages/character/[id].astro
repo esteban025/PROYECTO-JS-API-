@@ -12,37 +12,75 @@ export async function getStaticPaths() {
 
 const { id } = Astro.params;
 const character = await getCharacterById(id!);
-
 if (!character) {
   return Astro.redirect("/");
 }
 ---
 
 <Layout title={`${character.name} - Personaje | Proyecto JS API Rick y Morty`}>
+  <figure
+    class="absolute inset-0 w-full h-[50dvh] -z-10"
+    style="mask-image: linear-gradient(black 10%, transparent 90%);"
+  >
+    <img
+      src={character.image}
+      alt={character.name}
+      class="w-full h-full object-cover object-center opacity-20"
+      loading="lazy"
+    />
+  </figure>
+
   <header
-    class="w-full p-2 py-3 max-w-7xl mx-auto flex items-center flex-col gap-1"
+    class="w-full p-2 py-3 max-w-7xl mx-auto relative flex justify-center"
   >
     <h3
-      class="font-semibold text-primary leading-tight text-center"
+      class="text-lg font-semibold mb-2 text-transparent truncate w-max"
+      style="background: var(--color-gradient-name-card); -webkit-background-clip: text; background-clip: text;"
       transition:name={`personage-name-${character.id}`}
     >
       {character.name}
     </h3>
   </header>
-  <main>
-    <figure>
-      <img
-        src={character.image}
-        alt={character.name}
-        class="w-full max-w-sm mx-auto h-auto object-cover rounded-md mb-4"
-        loading="lazy"
+
+  <main class="p-4 w-full max-w-3xl mx-auto">
+    <section
+      class="grid gap-3"
+      style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));"
+    >
+      <figure
+        class="rounded-xl overflow-hidden aspect-[1/1.1] w-full"
         transition:name={`personage-image-${character.id}`}
-      />
-    </figure>
+      >
+        <img
+          src={character.image}
+          alt={character.name}
+          class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          loading="lazy"
+        />
+      </figure>
+      <div class="info">
+        <!-- - Información completa incluyendo: - Localización actual - Origen -
+        Lista de episodios en los que aparece - Datos adicionales relevantes -->
+        <h4 class="text-xl font-semibold mb-2 text-white">Información</h4>
+        <ul class="text-text-secondary space-y-2">
+          <li><strong>Nombre:</strong> {character.name}</li>
+          <li><strong>Estado:</strong> {character.status}</li>
+          <li><strong>Especie:</strong> {character.species}</li>
+          <li><strong>Género:</strong> {character.gender}</li>
+          <li><strong>Origen:</strong> {character.origin.name}</li>
+        </ul>
+      </div>
+    </section>
+    <section>
+      <h4 class="text-xl font-semibold my-4 text-white">Episodios</h4>
+      <ul class="list-disc list-inside text-text-secondary space-y-2">
+        {character.episode.map((ep) => <li>{ep}</li>)}
+      </ul>
+    </section>
   </main>
+  <style>
+    h3 {
+      font-size: clamp(2rem, 5vw, 4rem);
+    }
+  </style>
 </Layout>
-<style>
-  h3 {
-    font-size: clamp(2rem, 5vw, 4rem);
-  }
-</style>

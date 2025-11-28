@@ -1,7 +1,9 @@
 ---
-import ButtonClear from "@components/ButtonClear.astro";
+import ButtonPrimary from "@components/ButtonPrimary.astro";
 import ButtonFilter from "@components/ButtonFilter.astro";
 import FilterIcon from "@assets/filter-icon.svg";
+import RefreshIcon from "@assets/refresh.svg";
+
 import ArrowDownIcon from "@assets/arrow-down.svg";
 import { species } from "@utils/getSpecies";
 const speciesOptions = await species();
@@ -65,7 +67,10 @@ const speciesOptions = await species();
 
     <!-- Botón para limpiar filtros -->
     <div class="mt-4 flex justify-end">
-      <ButtonClear id="clear-filters" text="Limpiar filtros" />
+      <ButtonPrimary id="clear-filters">
+        <RefreshIcon class="w-4 h-4" />
+        Limpiar Filtros
+      </ButtonPrimary>
     </div>
   </div>
 </article>

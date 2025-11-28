@@ -1,0 +1,322 @@
+---
+import Arrow from "@assets/arrow-down.svg";
+import ButtonPrimary from "./ButtonPrimary.astro";
+interface Props {
+  currentPage?: number;
+  totalPages?: number;
+}
+---
+
+<div class="w-full max-w-xl mx-auto p-4 flex justify-center">
+  <nav
+    class="flex items-center justify-center gap-6"
+    aria-label="Paginación"
+    id="pagination-nav"
+  >
+    <!-- Botón Anterior -->
+    <ButtonPrimary
+      id="prev-btn"
+      aria-label="Página anterior"
+      style={"padding:8px"}
+    >
+      <div class="block rotate-90">
+        <Arrow class="w-4 h-4 block" />
+      </div>
+    </ButtonPrimary>
+
+    <!-- Números de Página -->
+    <div
+      class="flex items-center gap-1 relative"
+      style="width: 170px; height: 60px;"
+      id="page-numbers"
+    >
+      <!-- Los números se generarán dinámicamente -->
+    </div>
+
+    <!-- Botón Siguiente -->
+    <ButtonPrimary
+      id="next-btn"
+      aria-label="Página siguiente"
+      style={"padding:8px"}
+    >
+      <div class="block -rotate-90">
+        <Arrow class="w-4 h-4 block" />
+      </div>
+    </ButtonPrimary>
+  </nav>
+</div>
+
+<style>
+  @keyframes slideInFromRight {
+    from {
+      transform: translateX(60px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInFromLeft {
+    from {
+      transform: translateX(-60px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideOutToLeft {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(-60px);
+      opacity: 0;
+    }
+  }
+
+  @keyframes slideOutToRight {
+    from {
+      transform: translateX(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateX(60px);
+      opacity: 0;
+    }
+  }
+
+  .page-number {
+    position: absolute;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    user-select: none;
+  }
+
+  .page-number[data-position="left"] {
+    left: 0;
+  }
+
+  .page-number[data-position="center"] {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .page-number[data-position="right"] {
+    right: 0;
+  }
+
+  .page-number.slide-in-right {
+    animation: slideInFromRight 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .page-number.slide-in-left {
+    animation: slideInFromLeft 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  .page-number.slide-out-left {
+    animation: slideOutToLeft 0.3s ease-in forwards;
+  }
+
+  .page-number.slide-out-right {
+    animation: slideOutToRight 0.3s ease-in forwards;
+  }
+
+  .page-number.hidden {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .page-number.current {
+    color: #97ce4c;
+    font-size: 3rem;
+    font-weight: 600;
+  }
+
+  .page-number.inactive {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 1.875rem;
+  }
+
+  .page-number.inactive:hover {
+    color: rgba(255, 255, 255, 0.6);
+  }
+</style>
+
+<script>
+  import { $ } from "@/utils/getElementDOM";
+
+  document.addEventListener("astro:page-load", () => {
+    const totalPages = 10;
+    let currentPage = 1;
+    let isAnimating = false;
+
+    const prevBtn = $("#prev-btn") as HTMLButtonElement;
+    const nextBtn = $("#next-btn") as HTMLButtonElement;
+    const pageNumbersContainer = $("#page-numbers") as HTMLDivElement;
+
+    function createPageNumber(
+      pageNum: number | null,
+      position: "left" | "center" | "right",
+      isCurrent: boolean,
+    ): HTMLDivElement {
+      const pageDiv = document.createElement("div");
+      pageDiv.classList.add("page-number");
+      pageDiv.dataset.position = position;
+
+      if (pageNum !== null) {
+        pageDiv.textContent = pageNum.toString();
+        pageDiv.dataset.page = pageNum.toString();
+
+        if (isCurrent) {
+          pageDiv.classList.add("current");
+        } else {
+          pageDiv.classList.add("inactive");
+        }
+
+        pageDiv.addEventListener("click", () => {
+          if (!isAnimating && pageNum !== currentPage) {
+            const newDirection = pageNum > currentPage ? "next" : "prev";
+            currentPage = pageNum;
+            updatePagination(newDirection);
+          }
+        });
+      } else {
+        pageDiv.classList.add("hidden");
+      }
+
+      return pageDiv;
+    }
+
+    function renderPageNumbers(direction: "next" | "prev" | "init" = "init") {
+      if (!pageNumbersContainer || isAnimating) return;
+
+      const pages: Array<{ num: number | null; isCurrent: boolean }> = [];
+
+      // Determinar qué números mostrar
+      if (currentPage === 1) {
+        pages.push(
+          { num: null, isCurrent: false },
+          { num: 1, isCurrent: true },
+          { num: totalPages > 1 ? 2 : null, isCurrent: false },
+        );
+      } else if (currentPage === totalPages) {
+        pages.push(
+          { num: currentPage - 1, isCurrent: false },
+          { num: currentPage, isCurrent: true },
+          { num: null, isCurrent: false },
+        );
+      } else {
+        pages.push(
+          { num: currentPage - 1, isCurrent: false },
+          { num: currentPage, isCurrent: true },
+          { num: currentPage + 1, isCurrent: false },
+        );
+      }
+
+      if (direction === "init") {
+        // Inicialización sin animación
+        pageNumbersContainer.innerHTML = "";
+        const positions: Array<"left" | "center" | "right"> = [
+          "left",
+          "center",
+          "right",
+        ];
+
+        pages.forEach((page, index) => {
+          const pageDiv = createPageNumber(
+            page.num,
+            positions[index],
+            page.isCurrent,
+          );
+          pageNumbersContainer.appendChild(pageDiv);
+        });
+      } else {
+        // Animación de transición
+        isAnimating = true;
+        const currentNumbers = Array.from(
+          pageNumbersContainer.querySelectorAll(".page-number"),
+        ) as HTMLDivElement[];
+
+        // Animar salida
+        currentNumbers.forEach((num) => {
+          if (!num.classList.contains("hidden")) {
+            num.classList.add(
+              direction === "next" ? "slide-out-left" : "slide-out-right",
+            );
+          }
+        });
+
+        // Esperar a que termine la animación y crear nuevos números
+        setTimeout(() => {
+          pageNumbersContainer.innerHTML = "";
+          const positions: Array<"left" | "center" | "right"> = [
+            "left",
+            "center",
+            "right",
+          ];
+
+          pages.forEach((page, index) => {
+            const pageDiv = createPageNumber(
+              page.num,
+              positions[index],
+              page.isCurrent,
+            );
+            pageNumbersContainer.appendChild(pageDiv);
+
+            // Animar entrada
+            if (!pageDiv.classList.contains("hidden")) {
+              // Forzar reflow para que la animación funcione
+              void pageDiv.offsetWidth;
+              pageDiv.classList.add(
+                direction === "next" ? "slide-in-right" : "slide-in-left",
+              );
+            }
+          });
+
+          setTimeout(() => {
+            isAnimating = false;
+          }, 400);
+        }, 300);
+      }
+    }
+
+    function updatePagination(direction: "next" | "prev" | "init" = "init") {
+      // Actualizar botones
+      if (prevBtn) {
+        prevBtn.disabled = currentPage === 1;
+      }
+      if (nextBtn) {
+        nextBtn.disabled = currentPage === totalPages;
+      }
+
+      // Renderizar números
+      renderPageNumbers(direction);
+    }
+
+    // Event listeners para botones
+    prevBtn?.addEventListener("click", () => {
+      if (currentPage > 1 && !isAnimating) {
+        currentPage--;
+        updatePagination("prev");
+      }
+    });
+
+    nextBtn?.addEventListener("click", () => {
+      if (currentPage < totalPages && !isAnimating) {
+        currentPage++;
+        updatePagination("next");
+      }
+    });
+
+    // Inicializar
+    updatePagination("init");
+  });
+</script>

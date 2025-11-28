@@ -17,29 +17,50 @@ const dataAttri = personage.name.toLowerCase().replace(/\s+/g, "-");
 <article data-name={dataAttri} class="cursor-pointer">
   <a href={`/character/${personage.id}`} class="block">
     <div
-      class="bg-bg-card/70 p-3 rounded-xl hover:shadow-md-primary transition-all duration-200 ease-in hover:-translate-y-1 hover:bg-bg-card/90"
+      class="bg-bg-card rounded-xl overflow-hidden backdrop-blur-md border border-border-card before:content-[''] before:absolute before:top-0 before:left-0 before:w-full before:h-full before:opacity-0 before:transition-opacity before:duration-300 before:pointer-events-none hover:before:opacity-100 character-card group"
     >
-      <figure class="relative">
+      <figure
+        class="overflow-hidden"
+        style="mask-image: linear-gradient(black, transparent);"
+        transition:name={`personage-image-${personage.id}`}
+      >
         <img
           src={personage.image}
           alt={personage.name}
-          class="w-full h-48 object-cover rounded-md mb-4"
+          class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
           loading="lazy"
-          transition:name={`personage-image-${personage.id}`}
         />
+      </figure>
+      <div class="card-info p-3 relative">
+        <h3
+          class="text-lg font-semibold mb-2 text-transparent truncate"
+          style="background: var(--color-gradient-name-card); -webkit-background-clip: text; background-clip: text;"
+          transition:name={`personage-name-${personage.id}`}
+        >
+          {personage.name}
+        </h3>
+        <p class="text-text-secondary text-xs">
+          Estado: {personage.status}
+        </p>
         <p
-          class="text-xs text-text-dark absolute bg-primary p-1 px-3 rounded-full top-2 left-2 font-bold"
+          class="text-xs text-primary absolute border border-primary p-1 px-3 rounded-full bottom-3 right-2"
         >
           {personage.species}
         </p>
-      </figure>
-      <h3
-        class="text-lg font-semibold mb-2 text-white truncate"
-        transition:name={`personage-name-${personage.id}`}
-      >
-        {personage.name}
-      </h3>
-      <p class="text-text-secondary mb-1 text-xs">Estado: {personage.status}</p>
+      </div>
     </div>
   </a>
 </article>
+
+<style>
+  .character-card {
+    transition: all 0.2s ease-in;
+    &:hover {
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: var(--shadow-card-hover);
+    }
+    &::before {
+      background: var(--color-gradient-inter-card);
+    }
+  }
+</style>
