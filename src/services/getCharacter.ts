@@ -14,17 +14,3 @@ export const getCharacterById = async (id: string): Promise<CharacterDetails | n
     return null
   }
 }
-
-export const getAllCharactersIds = async (): Promise<number[]> => {
-  try {
-    const res = await fetch(API_URLS.getAllCharacters)
-    if (!res.ok) {
-      throw new Error(`HTTP error! status: ${res.status}`)
-    }
-    const data = await res.json()
-    return data.results.map((character: CharacterDetails) => character.id)
-  } catch (error) {
-    console.error("Error fetching characters ids:", error)
-    return []
-  }
-}

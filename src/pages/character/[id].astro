@@ -1,14 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { getCharacterById, getAllCharactersIds } from "@/services/getCharacter";
-
-export async function getStaticPaths() {
-  const ids = await getAllCharactersIds();
-
-  return ids.map((id) => ({
-    params: { id: id.toString() },
-  }));
-}
+import { getCharacterById } from "@/services/getCharacter";
 
 const { id } = Astro.params;
 const character = await getCharacterById(id!);

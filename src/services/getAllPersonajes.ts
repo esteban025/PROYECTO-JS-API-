@@ -2,9 +2,10 @@ import { API_URLS } from "@/config/api"
 import type { CharacterCard, CharacterDetails } from "@/types/types"
 
 // Función para obtener todos los personajes con todos los datos
-export const getAllCharacters = async (): Promise<CharacterDetails[]> => {
+export const getAllCharacters = async (page: number = 1): Promise<CharacterDetails[]> => {
   try {
-    const res = await fetch(API_URLS.getAllCharacters)
+    const url = `${API_URLS.getAllCharacters}?page=${page}`
+    const res = await fetch(url)
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`)
     }
@@ -28,7 +29,7 @@ const transformToCardData = (characters: CharacterDetails[]): CharacterCard[] =>
 }
 
 // Función principal: hace fetch y devuelve solo los datos para las cards
-export const getAllCharactersCards = async (): Promise<CharacterCard[]> => {
-  const characters = await getAllCharacters()
+export const getAllCharactersCards = async (page: number = 1): Promise<CharacterCard[]> => {
+  const characters = await getAllCharacters(page)
   return transformToCardData(characters)
 }

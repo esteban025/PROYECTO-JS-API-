@@ -3,8 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import HeaderPage from "@/sections/HeaderPage.astro";
 import SearchPersonage from "@/components/SearchPersonage.astro";
 import FiltersPersonage from "@/components/FiltersPersonage.astro";
-import Personages from "@/sections/Personages.astro";
-import Pagination from "@/components/Pagination.astro";
+import PersonagesWithPagination from "@/components/react/PersonagesWithPagination";
 ---
 
 <Layout
@@ -14,6 +13,5 @@ import Pagination from "@/components/Pagination.astro";
 	<HeaderPage />
 	<SearchPersonage />
 	<FiltersPersonage />
-	<!-- <Personages /> -->
-	<Pagination />
+	<PersonagesWithPagination client:load />
 </Layout>
