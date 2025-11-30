@@ -1,7 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import HeaderPage from "@/sections/HeaderPage.astro";
-import SearchPersonage from "@/components/SearchPersonage.astro";
 import FiltersPersonage from "@/components/FiltersPersonage.astro";
 import Personages from "@/sections/Personages.astro";
 import Pagination from "@/components/Pagination.astro";
@@ -19,7 +18,6 @@ const numberPagination = await getNumberPagination();
 	description="Proyecto realizado con Astro y la API de Rick y Morty para mostrar personajes, episodios y localizaciones."
 >
 	<HeaderPage />
-	<SearchPersonage />
 	<FiltersPersonage />
 	<Personages />
 	<Pagination totalPages={numberPagination} currentPage={currentPage} />

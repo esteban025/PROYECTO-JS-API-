@@ -1,6 +1,8 @@
 ---
 import ButtonPrimary from "@components/ButtonPrimary.astro";
 import ButtonFilter from "@components/ButtonFilter.astro";
+import SearchPersonage from "./SearchPersonage.astro";
+
 import FilterIcon from "@assets/filter-icon.svg";
 import RefreshIcon from "@assets/refresh.svg";
 
@@ -17,44 +19,33 @@ const speciesOptions = infoFilter.species;
 const statusOptions = infoFilter.status;
 ---
 
-<article class="w-full max-w-3xl mx-auto p-4">
-  <div class="">
-    <h2 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
-      <FilterIcon class="w-5 h-5 text-primary" />
-      Filtros
-    </h2>
+<article class="w-full max-w-4xl mx-auto p-4">
+  <div class="flex flex-col gap-6">
+    <header class="flex items-center justify-between">
+      <h2 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
+        <FilterIcon class="w-5 h-5 text-primary" />
+        Filtros
+      </h2>
+      <ButtonPrimary id="clear-filters">
+        <RefreshIcon class="w-4 h-4" />
+        Limpiar Filtros
+      </ButtonPrimary>
+    </header>
 
-    <div class="grid grid-cols-2 gap-6 items-start">
-      <!-- Filtro por Estado -->
-      <div class="flex flex-wrap gap-3">
-        <span class="text-white font-semibold text-sm uppercase tracking-wide"
-          >Estado</span
-        >
-        <div class="flex items-center flex-wrap gap-2">
-          <ButtonFilter text="Todos" value="all" filter="status" />
-          {
-            statusOptions.map((status: any) => (
-              <ButtonFilter
-                text={status.charAt(0).toUpperCase() + status.slice(1)}
-                value={status.toLowerCase()}
-                filter="status"
-              />
-            ))
-          }
-        </div>
-      </div>
+    <div
+      class="grid gap-3 grid-container-filters"
+      style="grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));"
+    >
+      <!-- Filtro de busqueda -->
+      <SearchPersonage />
 
       <!-- Filtro por Especie -->
-      <div class="flex gap-3 flex-wrap justify-end">
-        <span class="text-white font-semibold text-sm uppercase tracking-wide"
-          >Especie</span
+      <div class="w-full">
+        <div
+          id="species-wrapper"
+          class="relative group px-3 py-2 rounded-lg border-2 bg-bg-card/50 border-primary/20 text-white focus:outline-none focus:border-primary focus:shadow-md-primary hover:bg-bg-card/95 hover:border-primary/40 transition-all duration-200 appearance-none cursor-pointer text-sm"
         >
-        <div class="relative group">
-          <select
-            id="species-filter"
-            class="select-custom px-3 py-2 pr-10 rounded-lg border-2 min-w-44 border-primary/20 text-white focus:outline-none focus:border-primary focus:shadow-md-primary hover:bg-bg-card/95 hover:border-primary/40 transition-all duration-200 appearance-none cursor-pointer text-sm"
-            style="background-image: var(--color-gradient-select); box-shadow: var(--shadow-inset-select);"
-          >
+          <select id="species-filter" class="select-custom w-full">
             <option
               value="all"
               class="bg-bg-card text-text-primary p-3 rounded-lg font-medium transition-all option-custom options"
@@ -76,14 +67,24 @@ const statusOptions = infoFilter.status;
           />
         </div>
       </div>
-    </div>
 
-    <!-- Botón para limpiar filtros -->
-    <div class="mt-4 flex justify-end">
-      <ButtonPrimary id="clear-filters">
-        <RefreshIcon class="w-4 h-4" />
-        Limpiar Filtros
-      </ButtonPrimary>
+      <!-- Filtro por Estado -->
+      <div
+        class="w-full rounded-lg p-1 bg-bg-card/50 min-h-11 border-2 border-primary/20"
+      >
+        <div class="flex items-center gap-1 w-full h-full">
+          <ButtonFilter text="Todos" value="all" filter="status" />
+          {
+            statusOptions.map((status: any) => (
+              <ButtonFilter
+                text={status.charAt(0).toUpperCase() + status.slice(1)}
+                value={status.toLowerCase()}
+                filter="status"
+              />
+            ))
+          }
+        </div>
+      </div>
     </div>
   </div>
 </article>
@@ -113,5 +114,13 @@ const statusOptions = infoFilter.status;
   }
   .options ~ .options {
     margin-top: 3px;
+  }
+  .grid-container-filters > *:last-child:nth-child(odd) {
+    grid-column: span 2;
+  }
+
+  /* Mantener borde primario cuando se selecciona algo diferente a "all" */
+  #species-wrapper:has(select:not([value="all"])) {
+    border-color: var(--color-primary);
   }
 </style>
