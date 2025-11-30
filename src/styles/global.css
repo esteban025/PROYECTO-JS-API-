@@ -50,3 +50,29 @@
     background: var(--color-gradient-inter-card);
   }
 }
+
+/* Estilos de scrollbar personalizados */
+.scroll-design {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) rgba(255, 255, 255, 0.05);
+}
+
+.scroll-design::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scroll-design::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.scroll-design::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.scroll-design::-webkit-scrollbar-thumb:hover {
+  background: #aad862;
+}

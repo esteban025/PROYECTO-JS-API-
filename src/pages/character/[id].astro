@@ -133,9 +133,7 @@ if (!character) {
             {character.episode.length === 1 ? "episodio" : "episodios"}
           </span>
         </h4>
-        <div
-          class="grid gap-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar"
-        >
+        <div class="grid gap-2 max-h-[400px] overflow-y-auto pr-2">
           {
             character.episode.map((ep, index) => (
               <div class="flex items-center gap-3 p-3 rounded-lg bg-bg-primary/50 hover:bg-bg-primary/80 transition-colors border border-border-card/30">
@@ -170,24 +168,6 @@ if (!character) {
   <style>
     h3 {
       font-size: clamp(2rem, 5vw, 4rem);
-    }
-
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 8px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: var(--color-primary);
-      border-radius: 10px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: var(--color-primary-hover, var(--color-primary));
     }
   </style>
 </Layout>
