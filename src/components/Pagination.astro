@@ -56,9 +56,9 @@ const { currentPage = 1, totalPages = [] } = Astro.props;
     const $btnNext = document.getElementById("next-btn");
     const $paginationSlider = document.querySelector(".pagination-slider");
     const $paginationViewport = document.querySelector(".pagination-viewport");
-    const $persoagesContainer = document.querySelector(
-      "section[data-page-number]",
-    );
+    // const $persoagesContainer = document.querySelector(
+    //   "section[data-page-number]",
+    // );
 
     const viewportCenter = $paginationViewport.clientWidth / 2; // 85px (centro del viewport)
     const itemWidth = 60; // 50px ancho elemento + 10px gap
