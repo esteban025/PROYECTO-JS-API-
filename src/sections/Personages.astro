@@ -1,3 +1,17 @@
+---
+import Card from "@/components/Card.astro";
+
+// Obtener el número de página desde la URL
+const currentPage = Astro.url.searchParams.get("page") || "1";
+
+// Obtener datos de la ruta API con el parámetro de página
+const res = await fetch(
+  new URL(`/api/get-info-filter?page=${currentPage}`, Astro.url.origin),
+);
+const infoFilter = await res.json();
+const charactesPage = infoFilter.characters;
+---
+
 <section class="w-full max-w-5xl mx-auto p-4">
   <h2 class="text-3xl font-bold mb-6 text-white">Personajes</h2>
   <div id="no-results" class="hidden text-center text-text-secondary py-8">
@@ -6,32 +20,30 @@
   <section
     id="characters-grid"
     class="grid gap-4"
-    data-page-number={1}
     style="grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));"
   >
-    <!-- Aqui se renderizaran las cards -->
+    {charactesPage.map((character: any) => <Card personage={character} />)}
   </section>
 </section>
 
 <script>
-  import { $ } from "@/utils/getElementDOM";
-  import { getAllCharactersCards } from "@/services/getAllPersonajes";
-
   document.addEventListener("astro:page-load", () => {
-    const $searchInput = $("#search-input") as HTMLInputElement;
-    const $charactersGrid = $("#characters-grid") as HTMLElement;
-    const noResults = $("#no-results") as HTMLElement;
-    const searchForm = $("#search-form") as HTMLFormElement;
+    const $charactersGrid = document.getElementById("characters-grid");
+    const $noResults = document.getElementById("no-results");
+    const $searchInput = document.getElementById(
+      "search-input",
+    ) as HTMLInputElement;
     const $statusButtons = document.querySelectorAll('[data-filter="status"]');
-    const $speciesSelect = $("#species-filter") as HTMLSelectElement;
-    const $clearButton = $("#clear-filters") as HTMLButtonElement;
+    const $speciesSelect = document.getElementById(
+      "species-filter",
+    ) as HTMLSelectElement;
+    const $clearButton = document.getElementById("clear-filters");
 
-    // Clave para localStorage
-    const FILTERS_STORAGE_KEY = "rickmorty-filters";
+    const FILTERS_KEY = "rickmorty-filters";
 
-    // Cargar filtros desde localStorage o usar valores por defecto
-    const loadFiltersFromStorage = () => {
-      const stored = localStorage.getItem(FILTERS_STORAGE_KEY);
+    // Cargar filtros desde localStorage
+    const loadFilters = () => {
+      const stored = localStorage.getItem(FILTERS_KEY);
       if (stored) {
         try {
           return JSON.parse(stored);
@@ -43,142 +55,68 @@
     };
 
     // Guardar filtros en localStorage
-    const saveFiltersToStorage = (filters: typeof currentFilters) => {
-      localStorage.setItem(FILTERS_STORAGE_KEY, JSON.stringify(filters));
+    const saveFilters = (filters: any) => {
+      localStorage.setItem(FILTERS_KEY, JSON.stringify(filters));
     };
 
-    // Estado de los filtros - cargar desde localStorage
-    let currentFilters = loadFiltersFromStorage();
+    let currentFilters = loadFilters();
 
-    // Función para renderizar las cards en el DOM
-    const renderCards = (characters: any[]) => {
-      $charactersGrid.innerHTML = "";
-
-      characters.forEach((character) => {
-        const article = document.createElement("article");
-        article.innerHTML = `
-        <a href="/character/${character.id}" class="block">
-          <div
-            class="bg-bg-card rounded-xl overflow-hidden backdrop-blur-md border border-border-card before:content-[''] before:absolute before:top-0 before:left-0 before:w-full before:h-full before:opacity-0 before:transition-opacity before:duration-300 before:pointer-events-none hover:before:opacity-100 character-card group"
-          >
-            <figure
-              class="overflow-hidden"
-              style="mask-image: linear-gradient(black, transparent);"
-              transition:name={"personage-image-${character.id}"}
-            >
-              <img
-                src=${character.image}
-                alt=${character.name}
-                class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-110"
-                loading="lazy"
-              />
-            </figure>
-            <div class="card-info p-3 relative">
-              <h3
-                class="text-lg font-semibold mb-2 text-transparent truncate"
-                style="background: var(--color-gradient-name-card); -webkit-background-clip: text; background-clip: text;"
-                transition:name={"personage-name-${character.id}"}
-              >
-                ${character.name}
-              </h3>
-              <p class="text-text-secondary text-xs">
-                Estado: ${character.status}
-              </p>
-              <p
-                class="text-xs text-primary absolute border border-primary p-1 px-3 rounded-full bottom-3 right-2"
-              >
-                ${character.species}
-              </p>
-            </div>
-          </div>
-        </a>
-      `;
-
-        $charactersGrid.appendChild(article);
-      });
-    };
-
-    // Función para cargar personajes de una página específica
-    const loadCharactersFromPage = async (pageNumber: number) => {
-      try {
-        noResults.classList.add("hidden");
-        $charactersGrid.classList.remove("hidden");
-        $charactersGrid.innerHTML =
-          '<p class="text-center text-white col-span-full py-8">Cargando...</p>';
-
-        const characters = await getAllCharactersCards(pageNumber);
-
-        if (characters.length === 0) {
-          noResults.classList.remove("hidden");
-          $charactersGrid.classList.add("hidden");
-        } else {
-          renderCards(characters);
-          applyFilters();
-        }
-      } catch (error) {
-        console.error("Error loading characters:", error);
-        $charactersGrid.innerHTML =
-          '<p class="text-center text-red-500 col-span-full py-8">Error al cargar personajes</p>';
-      }
-    };
-
-    // Observar cambios en el atributo data-page-number
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (
-          mutation.type === "attributes" &&
-          mutation.attributeName === "data-page-number"
-        ) {
-          const newPage = parseInt(
-            $charactersGrid.getAttribute("data-page-number") || "1",
-          );
-          loadCharactersFromPage(newPage);
-        }
-      });
-    });
-
-    observer.observe($charactersGrid, {
-      attributes: true,
-      attributeFilter: ["data-page-number"],
-    });
-
-    // Aplicar filtros guardados al cargar la página
-    const applyStoredFilters = () => {
+    // Aplicar filtros guardados a los controles
+    const applyStoredFiltersToControls = () => {
       // Aplicar búsqueda
       if ($searchInput && currentFilters.search) {
         $searchInput.value = currentFilters.search;
       }
 
-      // Aplicar estado
-      $statusButtons.forEach((btn) => {
-        const value = btn.getAttribute("data-value");
-        if (value === currentFilters.status) {
-          btn.classList.add("active");
-        } else {
-          btn.classList.remove("active");
-        }
-      });
-
-      // Aplicar especie
-      if ($speciesSelect && currentFilters.species) {
-        $speciesSelect.value = currentFilters.species;
+      // Aplicar estado - validar si existe en las opciones actuales
+      const availableStatuses = Array.from($statusButtons).map((btn) =>
+        btn.getAttribute("data-value"),
+      );
+      if (availableStatuses.includes(currentFilters.status)) {
+        $statusButtons.forEach((btn) => {
+          const value = btn.getAttribute("data-value");
+          if (value === currentFilters.status) {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+        });
+      } else {
+        // Si el estado guardado no existe en esta página, resetear a "all"
+        currentFilters.status = "all";
+        $statusButtons.forEach((btn) => {
+          const value = btn.getAttribute("data-value");
+          if (value === "all") {
+            btn.classList.add("active");
+          } else {
+            btn.classList.remove("active");
+          }
+        });
+        saveFilters(currentFilters);
       }
 
-      // Aplicar los filtros
-      applyFilters();
+      // Aplicar especie - validar si existe en las opciones actuales
+      if ($speciesSelect) {
+        const options = Array.from($speciesSelect.options).map(
+          (opt) => opt.value,
+        );
+        if (options.includes(currentFilters.species)) {
+          $speciesSelect.value = currentFilters.species;
+        } else {
+          // Si la especie guardada no existe en esta página, resetear a "all"
+          currentFilters.species = "all";
+          $speciesSelect.value = "all";
+          saveFilters(currentFilters);
+        }
+      }
     };
 
-    // Prevenir el envío del formulario
-    searchForm?.addEventListener("submit", (e) => {
-      e.preventDefault();
-    });
-
-    // Función principal para filtrar personajes
     const applyFilters = () => {
       const cards = $charactersGrid?.querySelectorAll("article");
       let visibleCount = 0;
 
       cards?.forEach((card) => {
+        const link = card.querySelector("a");
         const nameElement = card.querySelector("h3");
         const statusElement = card.querySelector("p.text-text-secondary");
         const speciesElement = card.querySelector("p.text-primary");
@@ -188,7 +126,7 @@
         const characterStatus =
           statusElement?.textContent
             ?.toLowerCase()
-            .replace("estado: ", "")
+            .replace("estado:", "")
             .trim() || "";
         const characterSpecies =
           speciesElement?.textContent?.toLowerCase().trim() || "";
@@ -215,32 +153,28 @@
 
       // Mostrar mensaje si no hay resultados
       if (visibleCount === 0) {
-        noResults?.classList.remove("hidden");
+        $noResults?.classList.remove("hidden");
         $charactersGrid?.classList.add("hidden");
       } else {
-        noResults?.classList.add("hidden");
+        $noResults?.classList.add("hidden");
         $charactersGrid?.classList.remove("hidden");
       }
 
-      // Guardar filtros en localStorage
-      saveFiltersToStorage(currentFilters);
+      // Guardar filtros
+      saveFilters(currentFilters);
     };
 
     // Filtro por búsqueda
     $searchInput?.addEventListener("input", (e) => {
-      const target = e.target as HTMLInputElement;
-      currentFilters.search = target.value;
+      currentFilters.search = (e.target as HTMLInputElement).value;
       applyFilters();
     });
 
     // Filtro por estado
     $statusButtons.forEach((button) => {
       button.addEventListener("click", () => {
-        // Remover clase active de todos los botones
         $statusButtons.forEach((btn) => btn.classList.remove("active"));
-        // Agregar clase active al botón clickeado
         button.classList.add("active");
-
         currentFilters.status = button.getAttribute("data-value") || "all";
         applyFilters();
       });
@@ -248,39 +182,33 @@
 
     // Filtro por especie
     $speciesSelect?.addEventListener("change", (e) => {
-      const target = e.target as HTMLSelectElement;
-      currentFilters.species = target.value;
+      currentFilters.species = (e.target as HTMLSelectElement).value;
       applyFilters();
     });
 
-    // Limpiar todos los filtros
+    // Limpiar filtros
     $clearButton?.addEventListener("click", () => {
-      // Resetear búsqueda
       if ($searchInput) $searchInput.value = "";
+      if ($speciesSelect) $speciesSelect.value = "all";
 
-      // Resetear estado
       $statusButtons.forEach((btn) => btn.classList.remove("active"));
       const allButton = document.querySelector(
         '[data-filter="status"][data-value="all"]',
       );
       allButton?.classList.add("active");
 
-      // Resetear especie
-      if ($speciesSelect) $speciesSelect.value = "all";
-
-      // Resetear filtros
       currentFilters = {
         search: "",
         status: "all",
         species: "all",
       };
 
+      saveFilters(currentFilters);
       applyFilters();
     });
 
-    // Inicializar: cargar página 1 y aplicar filtros guardados
-    loadCharactersFromPage(1).then(() => {
-      applyStoredFilters();
-    });
+    // Inicializar: aplicar filtros guardados y luego filtrar
+    applyStoredFiltersToControls();
+    applyFilters();
   });
 </script>

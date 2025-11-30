@@ -107,26 +107,18 @@ const { currentPage = 1, totalPages = [] } = Astro.props;
     $btnPrev?.addEventListener("click", () => {
       if (currentPageNumber > 1) {
         currentPageNumber--;
-        updateCurrentNumber(currentPageNumber);
-        updateButtons();
-        $paginationSlider.style.transform = `translateX(${calculateOffset(currentPageNumber)}px)`;
-        $persoagesContainer.setAttribute(
-          "data-page-number",
-          `${currentPageNumber}`,
-        );
+        const url = new URL(window.location.href);
+        url.searchParams.set("page", currentPageNumber.toString());
+        window.location.href = url.toString();
       }
     });
 
     $btnNext?.addEventListener("click", () => {
       if (currentPageNumber < totalPagesCount) {
         currentPageNumber++;
-        updateCurrentNumber(currentPageNumber);
-        updateButtons();
-        $paginationSlider.style.transform = `translateX(${calculateOffset(currentPageNumber)}px)`;
-        $persoagesContainer.setAttribute(
-          "data-page-number",
-          `${currentPageNumber}`,
-        );
+        const url = new URL(window.location.href);
+        url.searchParams.set("page", currentPageNumber.toString());
+        window.location.href = url.toString();
       }
     });
   });
