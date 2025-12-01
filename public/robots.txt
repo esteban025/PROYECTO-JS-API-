@@ -1,0 +1,13 @@
+# robots.txt para Proyecto JS API Rick y Morty
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://proyectorickapi.netlify.app/sitemap-index.xml
+
+# Bloquear acceso a APIs internas
+Disallow: /api/
+
+# Crawl-delay (opcional, solo si es necesario)
+# Crawl-delay: 1

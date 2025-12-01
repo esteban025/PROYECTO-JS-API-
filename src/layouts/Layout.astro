@@ -5,18 +5,61 @@ import { ClientRouter } from "astro:transitions";
 interface Props {
 	title?: string;
 	description?: string;
+	image?: string;
+	canonical?: string;
+	type?: "website" | "article";
+	keywords?: string;
 }
-const { title, description } = Astro.props;
+const {
+	title = "Proyecto JS API Rick y Morty | Esteban Dev",
+	description = "Explora el universo de Rick y Morty con nuestra aplicación web. Descubre personajes, episodios y localizaciones usando la API oficial.",
+	image = "/og-image.png",
+	canonical,
+	type = "website",
+	keywords = "Rick y Morty, API Rick y Morty, personajes Rick y Morty, Astro, JavaScript, Esteban Dev",
+} = Astro.props;
+
+const canonicalURL = canonical || new URL(Astro.url.pathname, Astro.site).href;
+const imageUrl = new URL(image, Astro.site).href;
 ---
 
 <!doctype html>
 <html lang="es" class="scroll-design">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+		<!-- Primary Meta Tags -->
 		<title>{title}</title>
+		<meta name="title" content={title} />
 		<meta name="description" content={description} />
+		<meta name="keywords" content={keywords} />
+		<meta name="author" content="Esteban Dev" />
+		<meta name="robots" content="index, follow" />
+		<meta name="language" content="Spanish" />
+		<link rel="canonical" href={canonicalURL} />
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content={type} />
+		<meta property="og:url" content={canonicalURL} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={imageUrl} />
+		<meta property="og:locale" content="es_ES" />
+		<meta property="og:site_name" content="Proyecto JS API Rick y Morty" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:url" content={canonicalURL} />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={imageUrl} />
+
+		<!-- Additional SEO -->
+		<meta name="theme-color" content="#97ce4c" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
+
 		<ClientRouter />
 	</head>
 	<body class="bg-bg-primary text-text-primary font-inter relative">

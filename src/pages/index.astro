@@ -11,12 +11,41 @@ import { getNumberPagination } from "@/services/getNumberPagination";
 const currentPage = parseInt(Astro.url.searchParams.get("page") || "1");
 
 const numberPagination = await getNumberPagination();
+
+const structuredData = {
+	"@context": "https://schema.org",
+	"@type": "WebSite",
+	name: "Proyecto JS API Rick y Morty",
+	description:
+		"Explora el universo de Rick y Morty: personajes, episodios y localizaciones con nuestra aplicación web interactiva.",
+	url: Astro.site?.href,
+	inLanguage: "es",
+	author: {
+		"@type": "Person",
+		name: "Esteban Dev",
+	},
+	potentialAction: {
+		"@type": "SearchAction",
+		target: {
+			"@type": "EntryPoint",
+			urlTemplate: `${Astro.site?.href}?search={search_term_string}`,
+		},
+		"query-input": "required name=search_term_string",
+	},
+};
 ---
 
 <Layout
-	title="Proyecto JS API Rick y Morty | Esteban Dev"
-	description="Proyecto realizado con Astro y la API de Rick y Morty para mostrar personajes, episodios y localizaciones."
+	title="Proyecto JS API Rick y Morty | Explora Personajes, Episodios y Más"
+	description="Descubre el universo completo de Rick y Morty: explora personajes, episodios y localizaciones. Aplicación web interactiva con filtros avanzados y búsqueda en tiempo real."
+	keywords="Rick y Morty, personajes Rick y Morty, episodios Rick y Morty, API Rick y Morty, Astro, JavaScript, Esteban Dev, buscador personajes"
+	type="website"
 >
+	<script
+		type="application/ld+json"
+		set:html={JSON.stringify(structuredData)}
+	/>
+
 	<HeaderPage />
 	<FiltersPersonage />
 	<Personages />

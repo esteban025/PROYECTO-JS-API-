@@ -16,16 +16,48 @@ const character = await getCharacterById(id!);
 if (!character) {
   return Astro.redirect("/");
 }
+
+// Structured data para el personaje
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: character.name,
+  image: character.image,
+  description: `${character.name} es un personaje de ${character.species} que aparece en la serie Rick y Morty. Estado: ${character.status}, Género: ${character.gender}.`,
+  gender: character.gender,
+  birthPlace: {
+    "@type": "Place",
+    name: character.origin.name,
+  },
+  location: {
+    "@type": "Place",
+    name: character.location.name,
+  },
+};
+
+const pageTitle = `${character.name} - Personaje de Rick y Morty | Información Completa`;
+const pageDescription = `Conoce toda la información sobre ${character.name}: ${character.species} ${character.gender}, estado ${character.status}. Origen: ${character.origin.name}. Apariciones en ${character.episode.length} episodios de Rick y Morty.`;
 ---
 
-<Layout title={`${character.name} - Personaje | Proyecto JS API Rick y Morty`}>
+<Layout
+  title={pageTitle}
+  description={pageDescription}
+  image={character.image}
+  type="article"
+  keywords={`${character.name}, Rick y Morty, ${character.species}, personaje Rick y Morty, ${character.status}, ${character.origin.name}`}
+>
+  <script
+    type="application/ld+json"
+    set:html={JSON.stringify(structuredData)}
+  />
+
   <figure
     class="absolute inset-0 w-full h-[50dvh] -z-10"
     style="mask-image: linear-gradient(black 10%, transparent 90%);"
   >
     <img
       src={character.image}
-      alt={character.name}
+      alt={`${character.name} - Personaje de Rick y Morty`}
       class="w-full h-full object-cover object-center opacity-20"
       loading="lazy"
     />
@@ -34,13 +66,13 @@ if (!character) {
   <header
     class="w-full p-2 py-3 max-w-7xl mx-auto relative flex justify-center"
   >
-    <h3
+    <h1
       class="text-lg font-semibold mb-2 text-transparent truncate w-max"
       style="background: var(--color-gradient-name-card); -webkit-background-clip: text; background-clip: text;"
       transition:name={`personage-name-${character.id}`}
     >
       {character.name}
-    </h3>
+    </h1>
   </header>
 
   <main class="p-4 w-full max-w-3xl mx-auto">
@@ -54,9 +86,11 @@ if (!character) {
       >
         <img
           src={character.image}
-          alt={character.name}
+          alt={`Imagen de ${character.name} - Rick y Morty`}
           class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
           loading="lazy"
+          width="300"
+          height="300"
         />
       </figure>
 
@@ -65,10 +99,10 @@ if (!character) {
         <div
           class="bg-bg-card rounded-xl p-5 border border-border-card backdrop-blur-md"
         >
-          <h4 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
+          <h2 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
             <UserIcon class="w-5 aspect-square text-primary" />
             Información General
-          </h4>
+          </h2>
           <ul class="space-y-3">
             <li class="flex items-start gap-3">
               <span class="text-primary font-semibold min-w-20">Estado:</span>
@@ -98,10 +132,10 @@ if (!character) {
         <div
           class="bg-bg-card rounded-xl p-5 border border-border-card backdrop-blur-md"
         >
-          <h4 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
+          <h2 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
             <LocationIcon class="w-5 aspect-square text-primary" />
             Ubicación
-          </h4>
+          </h2>
           <ul class="space-y-3">
             <li>
               <span class="text-primary font-semibold block mb-1">Origen:</span>
@@ -123,7 +157,7 @@ if (!character) {
       <div
         class="bg-bg-card rounded-xl p-5 border border-border-card backdrop-blur-md"
       >
-        <h4 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
+        <h2 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
           <EpisodesIcon class="w-5 aspect-square text-primary" />
           Episodios
           <span
@@ -132,7 +166,7 @@ if (!character) {
             {character.episode.length}
             {character.episode.length === 1 ? "episodio" : "episodios"}
           </span>
-        </h4>
+        </h2>
         <div class="grid gap-2 max-h-[400px] overflow-y-auto pr-2">
           {
             character.episode.map((ep, index) => (
@@ -166,8 +200,105 @@ if (!character) {
     });
   </script>
   <style>
-    h3 {
+    h1 {
       font-size: clamp(2rem, 5vw, 4rem);
     }
   </style>
 </Layout>
+<ul class="space-y-3">
+  <li class="flex items-start gap-3">
+    <span class="text-primary font-semibold min-w-20">Estado:</span>
+    <span class="text-text-secondary flex items-center gap-2">
+      <span
+        class={`inline-block w-2 h-2 rounded-full ${character.status.toLowerCase() === "alive" ? "bg-green-500" : character.status.toLowerCase() === "dead" ? "bg-red-500" : "bg-gray-500"}`}
+      ></span>
+      {character.status}
+    </span>
+  </li>
+  <li class="flex items-start gap-3">
+    <span class="text-primary font-semibold min-w-20">Especie:</span>
+    <span class="text-text-secondary">{character.species}</span>
+  </li>
+  <li class="flex items-start gap-3">
+    <span class="text-primary font-semibold min-w-20">Tipo:</span>
+    <span class="text-text-secondary">{character.type || "N/A"}</span>
+  </li>
+  <li class="flex items-start gap-3">
+    <span class="text-primary font-semibold min-w-20">Género:</span>
+    <span class="text-text-secondary">{character.gender}</span>
+  </li>
+</ul>
+
+<!-- Localización -->
+<div
+  class="bg-bg-card rounded-xl p-5 border border-border-card backdrop-blur-md"
+>
+  <h4 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
+    <LocationIcon class="w-5 aspect-square text-primary" />
+    Ubicación
+  </h4>
+  <ul class="space-y-3">
+    <li>
+      <span class="text-primary font-semibold block mb-1">Origen:</span>
+      <span class="text-text-secondary">{character.origin.name}</span>
+    </li>
+    <li>
+      <span class="text-primary font-semibold block mb-1"
+        >Última ubicación conocida:</span
+      >
+      <span class="text-text-secondary">{character.location.name}</span>
+    </li>
+  </ul>
+</div>
+
+<!-- Episodios -->
+<section class="mt-8">
+  <div
+    class="bg-bg-card rounded-xl p-5 border border-border-card backdrop-blur-md"
+  >
+    <h4 class="text-xl font-bold mb-4 text-white flex items-center gap-2">
+      <EpisodesIcon class="w-5 aspect-square text-primary" />
+      Episodios
+      <span
+        class="ml-auto text-sm font-normal text-primary bg-primary/10 px-3 py-1 rounded-full"
+      >
+        {character.episode.length}
+        {character.episode.length === 1 ? "episodio" : "episodios"}
+      </span>
+    </h4>
+    <div class="grid gap-2 max-h-[400px] overflow-y-auto pr-2">
+      {
+        character.episode.map((ep, index) => (
+          <div class="flex items-center gap-3 p-3 rounded-lg bg-bg-primary/50 hover:bg-bg-primary/80 transition-colors border border-border-card/30">
+            <span class="text-primary font-bold text-sm min-w-[30px]">
+              #{index + 1}
+            </span>
+            <span class="text-text-secondary text-sm">{ep}</span>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Botón de regreso -->
+<div class="mt-8 flex justify-center">
+  <ButtonPrimary id="btn-back-page">
+    <ArrowIcon class="w-4 h-4 block rotate-90" />
+    Volver al inicio
+  </ButtonPrimary>
+</div>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const $backBtn = document.getElementById("btn-back-page");
+    $backBtn?.addEventListener("click", () => {
+      history.back();
+    });
+  });
+</script>
+<style>
+  h3 {
+    font-size: clamp(2rem, 5vw, 4rem);
+  }
+</style>
