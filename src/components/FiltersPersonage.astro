@@ -99,6 +99,36 @@ const statusOptions = infoFilter.status;
     const $statusButtons = document.querySelectorAll('[data-filter="status"]');
     const $selectorBlock = document.getElementById("selector-block");
     const $clearButton = document.getElementById("clear-filters");
+    const $searchInput = document.getElementById(
+      "search-input",
+    ) as HTMLInputElement;
+    const $speciesSelect = document.getElementById(
+      "species-filter",
+    ) as HTMLSelectElement;
+
+    const FILTERS_KEY = "rickmorty-filters";
+
+    // Cargar filtros desde localStorage
+    const loadFilters = () => {
+      const stored = localStorage.getItem(FILTERS_KEY);
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          return { search: "", status: "all", species: "all" };
+        }
+      }
+      return { search: "", status: "all", species: "all" };
+    };
+
+    // Guardar filtros en localStorage y notificar cambio
+    const saveFilters = (filters: any) => {
+      localStorage.setItem(FILTERS_KEY, JSON.stringify(filters));
+      // Disparar evento personalizado para notificar cambio
+      document.dispatchEvent(new CustomEvent("filters-updated"));
+    };
+
+    let currentFilters = loadFilters();
 
     if ($selectorBlock && $statusButtons.length > 0) {
       // Función para mover el selector al botón activo
@@ -115,44 +145,112 @@ const statusOptions = infoFilter.status;
         $selectorBlock.style.transform = `translateX(${offsetLeft}px)`;
       };
 
-      // Event listeners para cada botón
+      // Event listeners para cada botón de status
       $statusButtons.forEach((button) => {
         button.addEventListener("click", () => {
+          $statusButtons.forEach((btn) => btn.classList.remove("active"));
+          button.classList.add("active");
+
+          // Actualizar filtros
+          currentFilters.status = button.getAttribute("data-value") || "all";
+          saveFilters(currentFilters);
+
+          // Mover selector visual
           moveSelector(button);
         });
       });
 
+      // Event listener para el input de búsqueda
+      $searchInput?.addEventListener("input", (e) => {
+        currentFilters.search = (e.target as HTMLInputElement).value;
+        saveFilters(currentFilters);
+      });
+
+      // Event listener para el select de especies
+      $speciesSelect?.addEventListener("change", (e) => {
+        currentFilters.species = (e.target as HTMLSelectElement).value;
+        saveFilters(currentFilters);
+      });
+
       // Event listener para el botón de limpiar filtros
       $clearButton?.addEventListener("click", () => {
+        // Resetear valores en la UI
+        if ($searchInput) $searchInput.value = "";
+        if ($speciesSelect) $speciesSelect.value = "all";
+
+        $statusButtons.forEach((btn) => btn.classList.remove("active"));
+
+        // Agregar active al botón "all"
+        const allButton = document.querySelector(
+          '[data-filter="status"][data-value="all"]',
+        );
+        allButton?.classList.add("active");
+
+        // Resetear filtros
+        currentFilters = {
+          search: "",
+          status: "all",
+          species: "all",
+        };
+        saveFilters(currentFilters);
+
+        // Mover selector al botón "all"
+        if (allButton) moveSelector(allButton);
+      });
+
+      // INICIALIZACIÓN: Aplicar filtros guardados a la UI
+      // Aplicar búsqueda
+      if ($searchInput && currentFilters.search) {
+        $searchInput.value = currentFilters.search;
+      }
+
+      // Aplicar especie
+      if ($speciesSelect && currentFilters.species) {
+        const options = Array.from($speciesSelect.options).map(
+          (opt) => opt.value,
+        );
+        if (options.includes(currentFilters.species)) {
+          $speciesSelect.value = currentFilters.species;
+        } else {
+          // Si la especie guardada no existe, resetear
+          currentFilters.species = "all";
+          $speciesSelect.value = "all";
+          saveFilters(currentFilters);
+        }
+      }
+
+      // Aplicar status y posicionar selector
+      const availableStatuses = Array.from($statusButtons).map((btn) =>
+        btn.getAttribute("data-value"),
+      );
+
+      if (availableStatuses.includes(currentFilters.status)) {
+        // El status guardado existe en esta página
+        $statusButtons.forEach((btn) => {
+          const value = btn.getAttribute("data-value");
+          if (value === currentFilters.status) {
+            btn.classList.add("active");
+            moveSelector(btn);
+          } else {
+            btn.classList.remove("active");
+          }
+        });
+      } else {
+        // El status guardado no existe, resetear a "all"
+        currentFilters.status = "all";
+        saveFilters(currentFilters);
+
         const allButton = document.querySelector(
           '[data-filter="status"][data-value="all"]',
         );
         if (allButton) {
-          setTimeout(() => moveSelector(allButton), 50);
+          allButton.classList.add("active");
+          moveSelector(allButton);
         }
-      });
-
-      // Inicializar el selector en el botón "Todos" por defecto
-      const allButton = document.querySelector(
-        '[data-filter="status"][data-value="all"]',
-      );
-      if (allButton) {
-        setTimeout(() => moveSelector(allButton), 50);
       }
 
-      // Actualizar posición al cargar si hay un filtro guardado
-      const savedFilters = localStorage.getItem("rickmorty-filters");
-      if (savedFilters) {
-        try {
-          const filters = JSON.parse(savedFilters);
-          const activeButton = document.querySelector(
-            `[data-filter="status"][data-value="${filters.status}"]`,
-          );
-          if (activeButton) {
-            setTimeout(() => moveSelector(activeButton), 50);
-          }
-        } catch {}
-      }
+      // Notificar que los filtros están listos después de la inicialización
+      document.dispatchEvent(new CustomEvent("filters-updated"));
     }
   });
 </script>
