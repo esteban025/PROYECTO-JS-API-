@@ -1,12 +1,13 @@
 ---
+import "@styles/buttons.css";
 import ButtonPrimary from "@components/ButtonPrimary.astro";
 import ButtonFilter from "@components/ButtonFilter.astro";
 import SearchPersonage from "./SearchPersonage.astro";
 
 import FilterIcon from "@assets/filter-icon.svg";
 import RefreshIcon from "@assets/refresh.svg";
-
 import ArrowDownIcon from "@assets/arrow-down.svg";
+import StarIcon from "@assets/star.svg";
 
 // Obtener el número de página desde la URL
 const currentPage = Astro.url.searchParams.get("page") || "1";
@@ -26,10 +27,19 @@ const statusOptions = infoFilter.status;
         <FilterIcon class="w-5 h-5 text-primary" />
         Filtros
       </h2>
-      <ButtonPrimary id="clear-filters">
-        <RefreshIcon class="w-4 h-4" />
-        Limpiar Filtros
-      </ButtonPrimary>
+      <div class="flex items-center gap-4">
+        <button
+          id="filter-favorites-btn"
+          class="btn-secondary group transition-colors"
+        >
+          <StarIcon class="w-4 h-4" />
+          <span>Favoritos</span>
+        </button>
+        <ButtonPrimary id="clear-filters">
+          <RefreshIcon class="w-4 h-4" />
+          Limpiar Filtros
+        </ButtonPrimary>
+      </div>
     </header>
 
     <div
@@ -99,6 +109,7 @@ const statusOptions = infoFilter.status;
     const $statusButtons = document.querySelectorAll('[data-filter="status"]');
     const $selectorBlock = document.getElementById("selector-block");
     const $clearButton = document.getElementById("clear-filters");
+    const $favoritesButton = document.getElementById("filter-favorites-btn");
     const $searchInput = document.getElementById(
       "search-input",
     ) as HTMLInputElement;
@@ -115,10 +126,20 @@ const statusOptions = infoFilter.status;
         try {
           return JSON.parse(stored);
         } catch {
-          return { search: "", status: "all", species: "all" };
+          return {
+            search: "",
+            status: "all",
+            species: "all",
+            onlyFavorites: false,
+          };
         }
       }
-      return { search: "", status: "all", species: "all" };
+      return {
+        search: "",
+        status: "all",
+        species: "all",
+        onlyFavorites: false,
+      };
     };
 
     // Guardar filtros en localStorage y notificar cambio
@@ -172,6 +193,20 @@ const statusOptions = infoFilter.status;
         saveFilters(currentFilters);
       });
 
+      // Event listener para el botón de favoritos
+      $favoritesButton?.addEventListener("click", () => {
+        currentFilters.onlyFavorites = !currentFilters.onlyFavorites;
+
+        // Toggle estado visual del botón
+        if (currentFilters.onlyFavorites) {
+          $favoritesButton.classList.add("active");
+        } else {
+          $favoritesButton.classList.remove("active");
+        }
+
+        saveFilters(currentFilters);
+      });
+
       // Event listener para el botón de limpiar filtros
       $clearButton?.addEventListener("click", () => {
         // Resetear valores en la UI
@@ -179,6 +214,7 @@ const statusOptions = infoFilter.status;
         if ($speciesSelect) $speciesSelect.value = "all";
 
         $statusButtons.forEach((btn) => btn.classList.remove("active"));
+        $favoritesButton?.classList.remove("active");
 
         // Agregar active al botón "all"
         const allButton = document.querySelector(
@@ -191,6 +227,7 @@ const statusOptions = infoFilter.status;
           search: "",
           status: "all",
           species: "all",
+          onlyFavorites: false,
         };
         saveFilters(currentFilters);
 
@@ -202,6 +239,11 @@ const statusOptions = infoFilter.status;
       // Aplicar búsqueda
       if ($searchInput && currentFilters.search) {
         $searchInput.value = currentFilters.search;
+      }
+
+      // Aplicar estado del botón de favoritos
+      if (currentFilters.onlyFavorites) {
+        $favoritesButton?.classList.add("active");
       }
 
       // Aplicar especie
@@ -278,14 +320,27 @@ const statusOptions = infoFilter.status;
     color: var(--color-primary);
     font-weight: 600;
   }
+
   .options ~ .options {
     margin-top: 3px;
   }
+
   .grid-container-filters > *:last-child:nth-child(odd) {
     grid-column: span 2;
   }
 
   #species-wrapper:has(select option[value="all"]:not(:checked)) {
     border-color: var(--color-primary);
+  }
+
+  #filter-favorites-btn {
+    &.active {
+      color: var(--color-primary);
+    }
+    &.active svg {
+      fill: var(--color-primary);
+      stroke: var(--color-primary);
+      transform: rotate(12deg);
+    }
   }
 </style>

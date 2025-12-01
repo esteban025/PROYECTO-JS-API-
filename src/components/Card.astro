@@ -1,4 +1,5 @@
 ---
+import StarIcon from "@assets/star.svg";
 interface Personage {
   id: number;
   name: string;
@@ -14,11 +15,24 @@ const { personage } = Astro.props;
 const dataAttri = personage.name.toLowerCase().replace(/\s+/g, "-");
 ---
 
-<article data-name={dataAttri} class="cursor-pointer">
+<article
+  data-name={dataAttri}
+  data-character-id={personage.id}
+  class="cursor-pointer"
+>
   <a href={`/character/${personage.id}`} class="block">
     <div
-      class="bg-bg-card rounded-xl overflow-hidden backdrop-blur-md border border-border-card before:content-[''] before:absolute before:top-0 before:left-0 before:w-full before:h-full before:opacity-0 before:transition-opacity before:duration-300 before:pointer-events-none hover:before:opacity-100 character-card group"
+      class="bg-bg-card rounded-xl overflow-hidden backdrop-blur-md border border-border-card before:content-[''] before:absolute before:top-0 before:left-0 before:w-full before:h-full before:opacity-0 before:transition-opacity before:duration-300 before:pointer-events-none hover:before:opacity-100 character-card group relative"
     >
+      <button
+        data-favorite-btn
+        data-character-id={personage.id}
+        class="favorite-btn absolute top-4 right-2 z-10 bg-bg-primary/80 backdrop-blur-sm p-3 cursor-pointer rounded-full border border-primary/30 opacity-0 -translate-y-2.5 transition-all duration-300 hover:bg-bg-card/80 hover:border-primary hover:scale-110"
+      >
+        <StarIcon
+          class="w-5 h-5 fill-transparent stroke-primary transition-all duration-300 hover:fill-primary"
+        />
+      </button>
       <figure
         class="overflow-hidden"
         style="mask-image: linear-gradient(black, transparent);"
@@ -59,8 +73,98 @@ const dataAttri = personage.name.toLowerCase().replace(/\s+/g, "-");
       transform: translateY(-8px) scale(1.03);
       box-shadow: var(--shadow-card-hover);
     }
+    &:hover .favorite-btn {
+      opacity: 1;
+      transform: translateY(0);
+    }
     &::before {
       background: var(--color-gradient-inter-card);
     }
   }
+
+  .favorite-btn {
+    &:hover {
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+    }
+
+    &.is-favorite {
+      opacity: 1;
+      & svg {
+        fill: var(--color-primary);
+        transform: rotate(12deg);
+      }
+    }
+  }
 </style>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const FAVORITES_KEY = "rickmorty-favorites";
+
+    // Obtener favoritos desde localStorage
+    const getFavorites = (): number[] => {
+      const stored = localStorage.getItem(FAVORITES_KEY);
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    };
+
+    // Guardar favoritos en localStorage
+    const saveFavorites = (favorites: number[]) => {
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+    };
+
+    // Agregar o quitar de favoritos
+    const toggleFavorite = (characterId: number) => {
+      let favorites = getFavorites();
+
+      if (favorites.includes(characterId)) {
+        // Quitar de favoritos
+        favorites = favorites.filter((id) => id !== characterId);
+      } else {
+        // Agregar a favoritos
+        favorites.push(characterId);
+      }
+
+      saveFavorites(favorites);
+      updateFavoriteButtons();
+    };
+
+    // Actualizar el estado visual de los botones
+    const updateFavoriteButtons = () => {
+      const favorites = getFavorites();
+      const buttons = document.querySelectorAll("[data-favorite-btn]");
+
+      buttons.forEach((button) => {
+        const characterId = parseInt(
+          button.getAttribute("data-character-id") || "0",
+        );
+        favorites.includes(characterId)
+          ? button.classList.add("is-favorite")
+          : button.classList.remove("is-favorite");
+      });
+    };
+
+    // Event listeners para todos los botones de favoritos
+    const favoriteButtons = document.querySelectorAll("[data-favorite-btn]");
+    favoriteButtons.forEach((button) => {
+      button.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const characterId = parseInt(
+          button.getAttribute("data-character-id") || "0",
+        );
+        toggleFavorite(characterId);
+      });
+    });
+
+    // Inicializar el estado de los botones
+    updateFavoriteButtons();
+  });
+</script>

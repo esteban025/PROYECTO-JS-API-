@@ -15,7 +15,13 @@ const charactesPage = infoFilter.characters;
 <section class="w-full max-w-5xl mx-auto p-4">
   <h2 class="text-3xl font-bold mb-6 text-white">Personajes</h2>
   <div id="no-results" class="hidden text-center text-text-secondary py-8">
-    <p class="text-lg">No se encontraron personajes con ese nombre 😕</p>
+    <p class="text-lg">No se encontraron personajes 😕</p>
+  </div>
+  <div id="no-favorites" class="hidden text-center text-text-secondary py-8">
+    <p class="text-lg">No tienes personajes favoritos aún ⭐</p>
+    <p class="text-sm mt-2">
+      Haz clic en la estrella de cualquier personaje para agregarlo a favoritos
+    </p>
   </div>
   <section
     id="characters-grid"
@@ -30,7 +36,9 @@ const charactesPage = infoFilter.characters;
   document.addEventListener("astro:page-load", () => {
     const $charactersGrid = document.getElementById("characters-grid");
     const $noResults = document.getElementById("no-results");
+    const $noFavorites = document.getElementById("no-favorites");
     const FILTERS_KEY = "rickmorty-filters";
+    const FAVORITES_KEY = "rickmorty-favorites";
 
     // Cargar filtros desde localStorage
     function loadFilters() {
@@ -39,19 +47,46 @@ const charactesPage = infoFilter.characters;
         try {
           return JSON.parse(stored);
         } catch {
-          return { search: "", status: "all", species: "all" };
+          return {
+            search: "",
+            status: "all",
+            species: "all",
+            onlyFavorites: false,
+          };
         }
       }
-      return { search: "", status: "all", species: "all" };
+      return {
+        search: "",
+        status: "all",
+        species: "all",
+        onlyFavorites: false,
+      };
+    }
+
+    // Obtener favoritos desde localStorage
+    function getFavorites(): number[] {
+      const stored = localStorage.getItem(FAVORITES_KEY);
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          return [];
+        }
+      }
+      return [];
     }
 
     // Aplicar filtros a las cards
     function applyFiltersFromStorage() {
       const currentFilters = loadFilters();
+      const favorites = getFavorites();
       const cards = $charactersGrid?.querySelectorAll("article");
       let visibleCount = 0;
 
       cards?.forEach((card) => {
+        const characterId = parseInt(
+          card.getAttribute("data-character-id") || "0",
+        );
         const nameElement = card.querySelector("h3");
         const statusElement = card.querySelector("p.text-text-secondary");
         const speciesElement = card.querySelector("p.text-primary");
@@ -76,9 +111,16 @@ const charactesPage = infoFilter.characters;
         const matchesSpecies =
           currentFilters.species === "all" ||
           characterSpecies === currentFilters.species;
+        const matchesFavorites =
+          !currentFilters.onlyFavorites || favorites.includes(characterId);
 
         // Mostrar solo si cumple todos los filtros
-        if (matchesSearch && matchesStatus && matchesSpecies) {
+        if (
+          matchesSearch &&
+          matchesStatus &&
+          matchesSpecies &&
+          matchesFavorites
+        ) {
           card.classList.remove("hidden");
           visibleCount++;
         } else {
@@ -86,12 +128,22 @@ const charactesPage = infoFilter.characters;
         }
       });
 
-      // Mostrar mensaje si no hay resultados
+      // Mostrar mensaje apropiado si no hay resultados
       if (visibleCount === 0) {
-        $noResults?.classList.remove("hidden");
         $charactersGrid?.classList.add("hidden");
+
+        if (currentFilters.onlyFavorites && favorites.length === 0) {
+          // No tiene favoritos
+          $noFavorites?.classList.remove("hidden");
+          $noResults?.classList.add("hidden");
+        } else {
+          // Tiene filtros activos pero no hay resultados
+          $noResults?.classList.remove("hidden");
+          $noFavorites?.classList.add("hidden");
+        }
       } else {
         $noResults?.classList.add("hidden");
+        $noFavorites?.classList.add("hidden");
         $charactersGrid?.classList.remove("hidden");
       }
     }
