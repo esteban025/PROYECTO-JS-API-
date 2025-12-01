@@ -9,15 +9,15 @@ Este proyecto permite a los usuarios navegar y descubrir información detallada 
 ## ✨ Características
 
 ### 1. Búsqueda y Filtrado de Personajes
-- Listado completo de personajes con información principal (nombre, imagen, estado, especie)
-- Buscador en tiempo real para filtrar personajes por nombre
-- Filtros avanzados por:
+- [✔] Listado completo de personajes con información principal (nombre, imagen, estado, especie)
+- [✔] Buscador en tiempo real para filtrar personajes por nombre
+- [✔] Filtros avanzados por:
   - Estado: Alive, Dead, Unknown
   - Especie: Human, Alien, etc.
 
 ### 2. Detalle de Personaje
-- Vista detallada al hacer clic en cualquier personaje
-- Información completa incluyendo:
+- [✔] Vista detallada al hacer clic en cualquier personaje
+- [✔] Información completa incluyendo:
   - Localización actual
   - Origen
   - Lista de episodios en los que aparece
@@ -32,9 +32,9 @@ Este proyecto permite a los usuarios navegar y descubrir información detallada 
 - Navegación directa desde episodios a detalles de personajes
 
 ### 4. Paginación o Carga Dinámica
-- Sistema de paginación para navegar entre resultados
-- Opción de botón "Cargar más" para experiencia de scroll infinito
-- Manejo eficiente de los datos paginados de la API
+- [✔] Sistema de paginación para navegar entre resultados
+- [ ] Opción de botón "Cargar más" para experiencia de scroll infinito
+- [✔] Manejo eficiente de los datos paginados de la API
 
 ### 5. Favoritos (Opcional con LocalStorage)
 - Funcionalidad para marcar personajes/episodios como favoritos
@@ -51,12 +51,12 @@ Este proyecto permite a los usuarios navegar y descubrir información detallada 
   - Endpoints incorrectos
 
 ### 7. Diseño y Responsividad
-- Interfaz adaptativa para todos los dispositivos:
+- [✔] Interfaz adaptativa para todos los dispositivos:
   - Móviles (smartphones)
   - Tabletas
   - Desktop
-- Diseño moderno y temático de Rick and Morty
-- Experiencia de usuario optimizada
+- [✔] Diseño moderno y temático de Rick and Morty
+- [✔] Experiencia de usuario optimizada
 
 ## 🚀 API Utilizada
 
