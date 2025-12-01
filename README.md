@@ -37,17 +37,17 @@ Este proyecto permite a los usuarios navegar y descubrir información detallada 
 - [✔] Manejo eficiente de los datos paginados de la API
 
 ### 5. Favoritos (Opcional con LocalStorage)
-- Funcionalidad para marcar personajes/episodios como favoritos
-- Persistencia de favoritos usando localStorage
-- Sección independiente para visualizar todos los favoritos guardados
-- Sincronización automática entre sesiones
+- [✔] Funcionalidad para marcar personajes/episodios como favoritos
+- [✔] Persistencia de favoritos usando localStorage
+- [✔] Sección independiente para visualizar todos los favoritos guardados
+- [ ] Sincronización automática entre sesiones
 
 ### 6. Manejo de Errores y Estados
 - Indicadores visuales de carga (spinner o mensajes)
 - Mensajes informativos para diferentes estados:
   - Carga en progreso
   - Errores de conexión
-  - Sin resultados encontrados
+  - [✔] Sin resultados encontrados
   - Endpoints incorrectos
 
 ### 7. Diseño y Responsividad
