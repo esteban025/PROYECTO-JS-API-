@@ -63,17 +63,31 @@ const charactesPage = infoFilter.characters;
 
     // Aplicar filtros guardados a los controles
     const applyStoredFiltersToControls = () => {
+      // Recapturar elementos en cada ejecución
+      const $statusButtonsNow = document.querySelectorAll(
+        '[data-filter="status"]',
+      );
+      const $speciesSelectNow = document.getElementById(
+        "species-filter",
+      ) as HTMLSelectElement;
+      const $searchInputNow = document.getElementById(
+        "search-input",
+      ) as HTMLInputElement;
+
       // Aplicar búsqueda
-      if ($searchInput && currentFilters.search) {
-        $searchInput.value = currentFilters.search;
+      if ($searchInputNow && currentFilters.search) {
+        $searchInputNow.value = currentFilters.search;
       }
 
       // Aplicar estado - validar si existe en las opciones actuales
-      const availableStatuses = Array.from($statusButtons).map((btn) =>
+      const availableStatuses = Array.from($statusButtonsNow).map((btn) =>
         btn.getAttribute("data-value"),
       );
+      console.log("Estados disponibles:", availableStatuses);
+      console.log("Estado guardado:", currentFilters.status);
+
       if (availableStatuses.includes(currentFilters.status)) {
-        $statusButtons.forEach((btn) => {
+        $statusButtonsNow.forEach((btn) => {
           const value = btn.getAttribute("data-value");
           if (value === currentFilters.status) {
             btn.classList.add("active");
@@ -83,8 +97,9 @@ const charactesPage = infoFilter.characters;
         });
       } else {
         // Si el estado guardado no existe en esta página, resetear a "all"
+        console.log("Estado guardado no existe, reseteando a 'all'");
         currentFilters.status = "all";
-        $statusButtons.forEach((btn) => {
+        $statusButtonsNow.forEach((btn) => {
           const value = btn.getAttribute("data-value");
           if (value === "all") {
             btn.classList.add("active");
@@ -96,16 +111,16 @@ const charactesPage = infoFilter.characters;
       }
 
       // Aplicar especie - validar si existe en las opciones actuales
-      if ($speciesSelect) {
-        const options = Array.from($speciesSelect.options).map(
+      if ($speciesSelectNow) {
+        const options = Array.from($speciesSelectNow.options).map(
           (opt) => opt.value,
         );
         if (options.includes(currentFilters.species)) {
-          $speciesSelect.value = currentFilters.species;
+          $speciesSelectNow.value = currentFilters.species;
         } else {
           // Si la especie guardada no existe en esta página, resetear a "all"
           currentFilters.species = "all";
-          $speciesSelect.value = "all";
+          $speciesSelectNow.value = "all";
           saveFilters(currentFilters);
         }
       }
@@ -114,6 +129,8 @@ const charactesPage = infoFilter.characters;
     const applyFilters = () => {
       const cards = $charactersGrid?.querySelectorAll("article");
       let visibleCount = 0;
+
+      console.log("Aplicando filtros:", currentFilters);
 
       cards?.forEach((card) => {
         const link = card.querySelector("a");
@@ -141,6 +158,18 @@ const charactesPage = infoFilter.characters;
         const matchesSpecies =
           currentFilters.species === "all" ||
           characterSpecies === currentFilters.species;
+
+        // Debug para el primer personaje
+        if (visibleCount === 0) {
+          console.log("Primer personaje:", {
+            name: characterName,
+            status: characterStatus,
+            species: characterSpecies,
+            matchesSearch,
+            matchesStatus,
+            matchesSpecies,
+          });
+        }
 
         // Mostrar solo si cumple todos los filtros
         if (matchesSearch && matchesStatus && matchesSpecies) {
@@ -208,7 +237,20 @@ const charactesPage = infoFilter.characters;
     });
 
     // Inicializar: aplicar filtros guardados y luego filtrar
-    applyStoredFiltersToControls();
-    applyFilters();
+    console.log("Filtros cargados:", currentFilters);
+
+    // Esperar a que los botones de filtro estén disponibles
+    const waitForButtons = () => {
+      const buttons = document.querySelectorAll('[data-filter="status"]');
+      if (buttons.length > 0) {
+        applyStoredFiltersToControls();
+        console.log("Filtros después de aplicar a controles:", currentFilters);
+        applyFilters();
+      } else {
+        setTimeout(waitForButtons, 50);
+      }
+    };
+
+    waitForButtons();
   });
 </script>
