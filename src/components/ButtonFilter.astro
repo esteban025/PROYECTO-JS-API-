@@ -9,7 +9,7 @@ const { text, value, filter } = Astro.props;
 ---
 
 <button
-  class={`filter-btn w-full h-full rounded-lg  text-text-secondary hover:text-white hover:bg-bg-card/80 transition-all duration-200 text-xs font-medium cursor-pointer block border-status-unknown/20 hover:border-status-unknown/40`}
+  class={`filter-btn w-full h-full rounded-lg  text-text-secondary hover:text-white hover:bg-slate-900 transition-all duration-200 text-xs font-medium cursor-pointer block border-status-unknown/20 hover:border-status-unknown/40 relative z-10`}
   data-filter={filter}
   data-value={value}
 >
@@ -18,9 +18,11 @@ const { text, value, filter } = Astro.props;
 
 <style>
   .filter-btn.active {
-    border-color: var(--color-primary);
-    background-color: var(--color-primary);
     color: var(--color-text-dark);
     font-weight: 600;
+
+    &:hover {
+      background-color: transparent;
+    }
   }
 </style>

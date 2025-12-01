@@ -72,7 +72,12 @@ const statusOptions = infoFilter.status;
       <div
         class="w-full rounded-lg p-1 bg-bg-card/50 min-h-11 border-2 border-primary/20"
       >
-        <div class="flex items-center gap-1 w-full h-full">
+        <div class="flex items-center gap-1 w-full h-full relative">
+          <div
+            id="selector-block"
+            class="absolute bg-primary h-full rounded-lg transition-all duration-300 pointer-events-none"
+          >
+          </div>
           <ButtonFilter text="Todos" value="all" filter="status" />
           {
             statusOptions.map((status: any) => (
@@ -88,6 +93,69 @@ const statusOptions = infoFilter.status;
     </div>
   </div>
 </article>
+
+<script>
+  document.addEventListener("astro:page-load", () => {
+    const $statusButtons = document.querySelectorAll('[data-filter="status"]');
+    const $selectorBlock = document.getElementById("selector-block");
+    const $clearButton = document.getElementById("clear-filters");
+
+    if ($selectorBlock && $statusButtons.length > 0) {
+      // Función para mover el selector al botón activo
+      const moveSelector = (button: Element) => {
+        const buttonElement = button as HTMLElement;
+        const containerRect =
+          buttonElement.parentElement!.getBoundingClientRect();
+        const buttonRect = buttonElement.getBoundingClientRect();
+
+        const offsetLeft = buttonRect.left - containerRect.left;
+        const width = buttonRect.width;
+
+        $selectorBlock.style.width = `${width}px`;
+        $selectorBlock.style.transform = `translateX(${offsetLeft}px)`;
+      };
+
+      // Event listeners para cada botón
+      $statusButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          moveSelector(button);
+        });
+      });
+
+      // Event listener para el botón de limpiar filtros
+      $clearButton?.addEventListener("click", () => {
+        const allButton = document.querySelector(
+          '[data-filter="status"][data-value="all"]',
+        );
+        if (allButton) {
+          setTimeout(() => moveSelector(allButton), 50);
+        }
+      });
+
+      // Inicializar el selector en el botón "Todos" por defecto
+      const allButton = document.querySelector(
+        '[data-filter="status"][data-value="all"]',
+      );
+      if (allButton) {
+        setTimeout(() => moveSelector(allButton), 50);
+      }
+
+      // Actualizar posición al cargar si hay un filtro guardado
+      const savedFilters = localStorage.getItem("rickmorty-filters");
+      if (savedFilters) {
+        try {
+          const filters = JSON.parse(savedFilters);
+          const activeButton = document.querySelector(
+            `[data-filter="status"][data-value="${filters.status}"]`,
+          );
+          if (activeButton) {
+            setTimeout(() => moveSelector(activeButton), 50);
+          }
+        } catch {}
+      }
+    }
+  });
+</script>
 
 <style>
   select,
@@ -119,8 +187,7 @@ const statusOptions = infoFilter.status;
     grid-column: span 2;
   }
 
-  /* Mantener borde primario cuando se selecciona algo diferente a "all" */
-  #species-wrapper:has(select:not([value="all"])) {
+  #species-wrapper:has(select option[value="all"]:not(:checked)) {
     border-color: var(--color-primary);
   }
 </style>
